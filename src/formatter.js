@@ -6,13 +6,16 @@
 
 const { leagues, sportEmoji } = require("./config");
 
+const FOOTER = `\n\n🔗 [Join our waitlist here](https://www.getsportcliq.com)`;
+
 // ── Soccer ────────────────────────────────────────────────────────────────────
 
 function soccerGoal({ home, away, homeScore, awayScore, scorer, minute, leagueTag }) {
   return (
     `⚽ *GOAL\\!* ${escMd(home)} ${homeScore}–${awayScore} ${escMd(away)} *\\(${minute}'\\)*\n` +
     (scorer ? `👤 ${escMd(scorer)}\n` : "") +
-    `\n${escMd(leagueTag)} \\#Football`
+    `\n${escMd(leagueTag)} \\#Football`+
+    FOOTER
   );
 }
 
@@ -21,7 +24,8 @@ function soccerFinalResult({ home, away, homeScore, awayScore, leagueName, leagu
     `🏁 *FULL TIME*\n` +
     `${escMd(home)} *${homeScore}–${awayScore}* ${escMd(away)}\n` +
     `📋 ${escMd(leagueName)}\n` +
-    `\n${escMd(leagueTag)} \\#Football \\#FT`
+    `\n${escMd(leagueTag)} \\#Football \\#FT`+
+    FOOTER
   );
 }
 
@@ -31,7 +35,8 @@ function soccerPreMatch({ home, away, kickoff, leagueName, leagueTag }) {
     `${escMd(home)} 🆚 ${escMd(away)}\n` +
     `⏰ ${escMd(kickoff)} \\(UTC\\)\n` +
     `📋 ${escMd(leagueName)}\n` +
-    `\n${escMd(leagueTag)} \\#Football`
+    `\n${escMd(leagueTag)} \\#Football`+
+    FOOTER
   );
 }
 
@@ -41,7 +46,8 @@ function basketballLiveUpdate({ home, away, homeScore, awayScore, period, clock,
   return (
     `🏀 *LIVE* — Q${period} ${escMd(clock || "")}\n` +
     `${escMd(home)} *${homeScore}–${awayScore}* ${escMd(away)}\n` +
-    `\n${escMd(leagueTag)} \\#Basketball`
+    `\n${escMd(leagueTag)} \\#Basketball`+
+    FOOTER
   );
 }
 
@@ -50,7 +56,8 @@ function basketballFinalResult({ home, away, homeScore, awayScore, leagueName, l
     `🏁 *FINAL*\n` +
     `${escMd(home)} *${homeScore}–${awayScore}* ${escMd(away)}\n` +
     `📋 ${escMd(leagueName)}\n` +
-    `\n${escMd(leagueTag)} \\#Basketball`
+    `\n${escMd(leagueTag)} \\#Basketball`+
+    FOOTER
   );
 }
 
@@ -60,7 +67,8 @@ function basketballPreMatch({ home, away, kickoff, leagueName, leagueTag }) {
     `${escMd(home)} 🆚 ${escMd(away)}\n` +
     `⏰ ${escMd(kickoff)} \\(UTC\\)\n` +
     `📋 ${escMd(leagueName)}\n` +
-    `\n${escMd(leagueTag)} \\#Basketball`
+    `\n${escMd(leagueTag)} \\#Basketball`+
+    FOOTER
   );
 }
 
@@ -70,7 +78,8 @@ function nflLiveUpdate({ home, away, homeScore, awayScore, quarter, clock }) {
   return (
     `🏈 *LIVE* — Q${quarter} ${escMd(clock || "")}\n` +
     `${escMd(home)} *${homeScore}–${awayScore}* ${escMd(away)}\n` +
-    `\n\\#NFL \\#AmericanFootball`
+    `\n\\#NFL \\#AmericanFootball`+
+    FOOTER
   );
 }
 
@@ -78,7 +87,8 @@ function nflFinalResult({ home, away, homeScore, awayScore }) {
   return (
     `🏁 *FINAL — NFL*\n` +
     `${escMd(home)} *${homeScore}–${awayScore}* ${escMd(away)}\n` +
-    `\n\\#NFL \\#AmericanFootball`
+    `\n\\#NFL \\#AmericanFootball`+
+    FOOTER
   );
 }
 
@@ -87,7 +97,8 @@ function nflPreMatch({ home, away, kickoff }) {
     `🕐 *UPCOMING NFL GAME*\n` +
     `${escMd(home)} 🆚 ${escMd(away)}\n` +
     `⏰ ${escMd(kickoff)} \\(UTC\\)\n` +
-    `\n\\#NFL \\#AmericanFootball`
+    `\n\\#NFL \\#AmericanFootball`+
+    FOOTER
   );
 }
 
@@ -98,7 +109,8 @@ function nhlLiveUpdate({ home, away, homeScore, awayScore, period, clock }) {
   return (
     `🏒 *LIVE* — ${periodLabel} ${escMd(clock || "")}\n` +
     `${escMd(home)} *${homeScore}–${awayScore}* ${escMd(away)}\n` +
-    `\n\\#NHL \\#IceHockey`
+    `\n\\#NHL \\#IceHockey`+
+    FOOTER
   );
 }
 
@@ -106,7 +118,8 @@ function nhlFinalResult({ home, away, homeScore, awayScore }) {
   return (
     `🏁 *FINAL — NHL*\n` +
     `${escMd(home)} *${homeScore}–${awayScore}* ${escMd(away)}\n` +
-    `\n\\#NHL \\#IceHockey`
+    `\n\\#NHL \\#IceHockey`+
+    FOOTER
   );
 }
 
@@ -115,7 +128,8 @@ function nhlPreMatch({ home, away, kickoff }) {
     `🕐 *UPCOMING NHL GAME*\n` +
     `${escMd(home)} 🆚 ${escMd(away)}\n` +
     `⏰ ${escMd(kickoff)} \\(UTC\\)\n` +
-    `\n\\#NHL \\#IceHockey`
+    `\n\\#NHL \\#IceHockey`+
+    FOOTER
   );
 }
 
@@ -125,7 +139,8 @@ function newsArticle({ title, source, url }) {
   return (
     `📰 *${escMd(title)}*\n` +
     `🔗 [Read more on ${escMd(source)}](${url})\n` +
-    `\n\\#SportNews`
+    `\n\\#SportNews`+
+    FOOTER
   );
 }
 

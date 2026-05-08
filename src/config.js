@@ -30,7 +30,7 @@ module.exports = {
   // ── Cron schedules (UTC, 6-field with seconds) ────────────────────────────
  cron: {
   liveScores:    "*/30 * 10-23 * * *",
-  news:          "0 0 */3 * * *",  // every 3 hours
+  news:          "0 0 */2 * * *",  // every 2 hours
   preMatch:      "0 0 * * * *",
   dailyFixtures: "0 0 7 * * *",
 },
@@ -44,10 +44,41 @@ module.exports = {
   },
 
   // ── Google News RSS feeds (100% free, no API key) ─────────────────────────
+  // newsFeeds: [
+  //   {
+  //     url:  "https://news.google.com/rss/search?q=premier+league&hl=en-US&gl=US&ceid=US:en",
+  //     name: "Google News - EPL",
+  //   },
+  //   {
+  //     url:  "https://news.google.com/rss/search?q=NBA+basketball&hl=en-US&gl=US&ceid=US:en",
+  //     name: "Google News - NBA",
+  //   },
+  //   {
+  //     url:  "https://news.google.com/rss/search?q=NFL+american+football&hl=en-US&gl=US&ceid=US:en",
+  //     name: "Google News - NFL",
+  //   },
+  //   {
+  //     url:  "https://news.google.com/rss/search?q=NHL+hockey&hl=en-US&gl=US&ceid=US:en",
+  //     name: "Google News - NHL",
+  //   },
+  //   {
+  //     url:  "https://news.google.com/rss/search?q=champions+league+soccer&hl=en-US&gl=US&ceid=US:en",
+  //     name: "Google News - UCL",
+  //   },
+  //   {
+  //     url:  "https://news.google.com/rss/search?q=football+transfer+news&hl=en-US&gl=US&ceid=US:en",
+  //     name: "Google News - Transfers",
+  //   },
+  //   {
+  //     url:  "https://news.google.com/rss/search?q=la+liga+soccer&hl=en-US&gl=US&ceid=US:en",
+  //     name: "Google News - La Liga",
+  //   },
+  // ],
+
   newsFeeds: [
     {
-      url:  "https://news.google.com/rss/search?q=premier+league&hl=en-US&gl=US&ceid=US:en",
-      name: "Google News - EPL",
+      url:  "https://news.google.com/rss/search?q=premier+league+football&hl=en-US&gl=US&ceid=US:en",
+      name: "Google News - Football",
     },
     {
       url:  "https://news.google.com/rss/search?q=NBA+basketball&hl=en-US&gl=US&ceid=US:en",
@@ -60,18 +91,6 @@ module.exports = {
     {
       url:  "https://news.google.com/rss/search?q=NHL+hockey&hl=en-US&gl=US&ceid=US:en",
       name: "Google News - NHL",
-    },
-    {
-      url:  "https://news.google.com/rss/search?q=champions+league+soccer&hl=en-US&gl=US&ceid=US:en",
-      name: "Google News - UCL",
-    },
-    {
-      url:  "https://news.google.com/rss/search?q=football+transfer+news&hl=en-US&gl=US&ceid=US:en",
-      name: "Google News - Transfers",
-    },
-    {
-      url:  "https://news.google.com/rss/search?q=la+liga+soccer&hl=en-US&gl=US&ceid=US:en",
-      name: "Google News - La Liga",
     },
   ],
 

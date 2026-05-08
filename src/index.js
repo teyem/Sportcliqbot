@@ -49,7 +49,7 @@ cron.schedule("0 */2 10-23 * * *", safeJob("liveScores", async () => {
   await jobs.jobLiveNHL();
 }));
 
-// News — every 5 minutes
+// News — every 2 hrs
 cron.schedule(config.cron.news, safeJob("news", jobs.jobNews));
 
 // Pre-match alerts — top of every hour
@@ -66,7 +66,6 @@ cron.schedule(config.cron.dailyFixtures, safeJob("dailyFixtures", async () => {
 (async () => {
   try {
     await jobs.jobFetchDailyFixtures();
-    await jobs.jobNews();
 
     await bot.sendMessage(channelId, "🤖 SportCliq Bot is live\\!", {
       parse_mode: "MarkdownV2",

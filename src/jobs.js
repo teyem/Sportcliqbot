@@ -212,9 +212,12 @@ async function jobNews() {
   for (const feed of config.newsFeeds) {
     try {
       const parsed = await rss.parseURL(feed.url);
-      const items  = (parsed.items ?? []).slice(0, 5);
+      const items  = (parsed.items ?? []).slice(0, 10);
+      let sentForFeed = 0; // only 1 per feed
 
       for (const item of items) {
+        if (sentForFeed >= 1) break; // stop after 1 per feed
+
         const url = item.link;
         if (!url || db.hasPostedNews(url)) continue;
 
@@ -230,6 +233,7 @@ async function jobNews() {
 
         await send(msg);
         db.markPostedNews(url);
+        sentForFeed++;
         console.log(`📰 News: ${item.title?.slice(0, 60)}`);
       }
     } catch (e) {
