@@ -1,0 +1,79 @@
+// src/index.js
+require("dotenv").config();
+const cron        = require("node-cron");
+const TelegramBot = require("node-telegram-bot-api");
+
+const config = require("./config");
+const jobs   = require("./jobs");
+const db     = require("./db");
+
+// ── Validate env vars ─────────────────────────────────────────────────────────
+
+const REQUIRED = ["TELEGRAM_BOT_TOKEN", "TELEGRAM_CHANNEL_ID", "FOOTBALL_DATA_KEY"];
+for (const key of REQUIRED) {
+  if (!process.env[key]) {
+    console.error(`❌ Missing required env var: ${key}`);
+    process.exit(1);
+  }
+}
+
+// ── Boot bot ──────────────────────────────────────────────────────────────────
+
+const bot       = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: false });
+const channelId = process.env.TELEGRAM_CHANNEL_ID;
+
+jobs.init(bot, channelId);
+
+console.log("🤖 SportCliq Bot starting...");
+console.log(`📡 Channel: ${channelId}`);
+
+// ── Cron helper ───────────────────────────────────────────────────────────────
+
+function safeJob(name, fn) {
+  return async () => {
+    try {
+      await fn();
+    } catch (e) {
+      console.error(`❌ Job [${name}] uncaught error:`, e.message);
+    }
+  };
+}
+
+// ── Register cron jobs ────────────────────────────────────────────────────────
+
+// Live scores — every 2 minutes during match hours
+cron.schedule("0 */2 10-23 * * *", safeJob("liveScores", async () => {
+  await jobs.jobLiveSoccer();
+  await jobs.jobLiveNBA();
+  await jobs.jobLiveNFL();
+  await jobs.jobLiveNHL();
+}));
+
+// News — every 5 minutes
+cron.schedule(config.cron.news, safeJob("news", jobs.jobNews));
+
+// Pre-match alerts — top of every hour
+cron.schedule(config.cron.preMatch, safeJob("preMatch", jobs.jobPreMatch));
+
+// Daily fixture fetch — 07:00 UTC
+cron.schedule(config.cron.dailyFixtures, safeJob("dailyFixtures", async () => {
+  await jobs.jobFetchDailyFixtures();
+  db.cleanup();
+}));
+
+// ── Run once on startup ───────────────────────────────────────────────────────
+
+(async () => {
+  try {
+    await jobs.jobFetchDailyFixtures();
+    await jobs.jobNews();
+
+    await bot.sendMessage(channelId, "🤖 SportCliq Bot is live\\!", {
+      parse_mode: "MarkdownV2",
+    });
+
+    console.log("✅ SportCliq Bot is live and running!");
+  } catch (e) {
+    console.error("❌ Startup error:", e.message);
+  }
+})();
