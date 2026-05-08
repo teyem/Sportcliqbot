@@ -10,9 +10,9 @@ const { leagues, sportEmoji } = require("./config");
 
 function soccerGoal({ home, away, homeScore, awayScore, scorer, minute, leagueTag }) {
   return (
-    `⚽ *GOAL!* ${escMd(home)} ${homeScore}–${awayScore} ${escMd(away)} *(${minute}')*\n` +
+    `⚽ *GOAL\\!* ${escMd(home)} ${homeScore}–${awayScore} ${escMd(away)} *\\(${minute}'\\)*\n` +
     (scorer ? `👤 ${escMd(scorer)}\n` : "") +
-    `\n${leagueTag} \\#Football`
+    `\n${escMd(leagueTag)} \\#Football`
   );
 }
 
@@ -21,7 +21,7 @@ function soccerFinalResult({ home, away, homeScore, awayScore, leagueName, leagu
     `🏁 *FULL TIME*\n` +
     `${escMd(home)} *${homeScore}–${awayScore}* ${escMd(away)}\n` +
     `📋 ${escMd(leagueName)}\n` +
-    `\n${leagueTag} \\#Football \\#FT`
+    `\n${escMd(leagueTag)} \\#Football \\#FT`
   );
 }
 
@@ -31,7 +31,7 @@ function soccerPreMatch({ home, away, kickoff, leagueName, leagueTag }) {
     `${escMd(home)} 🆚 ${escMd(away)}\n` +
     `⏰ ${escMd(kickoff)} \\(UTC\\)\n` +
     `📋 ${escMd(leagueName)}\n` +
-    `\n${leagueTag} \\#Football`
+    `\n${escMd(leagueTag)} \\#Football`
   );
 }
 
@@ -41,7 +41,7 @@ function basketballLiveUpdate({ home, away, homeScore, awayScore, period, clock,
   return (
     `🏀 *LIVE* — Q${period} ${escMd(clock || "")}\n` +
     `${escMd(home)} *${homeScore}–${awayScore}* ${escMd(away)}\n` +
-    `\n${leagueTag} \\#Basketball`
+    `\n${escMd(leagueTag)} \\#Basketball`
   );
 }
 
@@ -50,7 +50,7 @@ function basketballFinalResult({ home, away, homeScore, awayScore, leagueName, l
     `🏁 *FINAL*\n` +
     `${escMd(home)} *${homeScore}–${awayScore}* ${escMd(away)}\n` +
     `📋 ${escMd(leagueName)}\n` +
-    `\n${leagueTag} \\#Basketball`
+    `\n${escMd(leagueTag)} \\#Basketball`
   );
 }
 
@@ -60,7 +60,7 @@ function basketballPreMatch({ home, away, kickoff, leagueName, leagueTag }) {
     `${escMd(home)} 🆚 ${escMd(away)}\n` +
     `⏰ ${escMd(kickoff)} \\(UTC\\)\n` +
     `📋 ${escMd(leagueName)}\n` +
-    `\n${leagueTag} \\#Basketball`
+    `\n${escMd(leagueTag)} \\#Basketball`
   );
 }
 

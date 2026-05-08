@@ -30,7 +30,7 @@ module.exports = {
   // ── Cron schedules (UTC, 6-field with seconds) ────────────────────────────
  cron: {
   liveScores:    "*/30 * 10-23 * * *",
-  news:          "0 0 * * * *",  // every 1 hour
+  news:          "0 0 */3 * * *",  // every 3 hours
   preMatch:      "0 0 * * * *",
   dailyFixtures: "0 0 7 * * *",
 },

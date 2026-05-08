@@ -29,7 +29,8 @@ const sportsdb = axios.create({
 // ── Soccer Live Scores (football-data.org) ────────────────────────────────────
 
 // Competition codes for football-data.org
-const FD_COMPETITIONS = ["PL", "CL", "PD", "SA", "BL1", "FL1", "EL"];
+const FD_COMPETITIONS = ["PL", "CL", "PD", "SA", "BL1", "FL1", "EL", "CLI"];
+
 
 async function getLiveSoccerFixtures() {
   try {
