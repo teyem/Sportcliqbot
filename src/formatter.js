@@ -12,7 +12,7 @@ const FOOTER = `\n\n🔗 [Join our waitlist here](https://www.getsportcliq.com)`
 
 function soccerGoal({ home, away, homeScore, awayScore, scorer, minute, leagueTag }) {
   return (
-    `⚽ *GOAL\\!* ${escMd(home)} ${homeScore}–${awayScore} ${escMd(away)} *\\(${minute}'\\)*\n` +
+    `⚽ *GOAL\\!* ${escMd(home)} ${homeScore}–${awayScore} ${escMd(away)}${minute ? ` *\\(${minute}'\\)*` : ""}\n` +
     (scorer ? `👤 ${escMd(scorer)}\n` : "") +
     `\n${escMd(leagueTag)} \\#Football`+
     FOOTER

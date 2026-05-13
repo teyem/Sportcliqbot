@@ -58,7 +58,7 @@ async function jobLiveSoccer() {
       home: f.home_team, away: f.away_team,
       homeScore: f.home_score, awayScore: f.away_score,
       scorer: null,
-      minute: f.minute ?? "?",
+      minute: f.minute ?? "",
       leagueTag: f.league_tag,
     });
 
