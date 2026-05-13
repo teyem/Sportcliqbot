@@ -63,6 +63,7 @@ cron.schedule(config.cron.dailyFixtures, safeJob("dailyFixtures", async () => {
 
 // ── Run once on startup ───────────────────────────────────────────────────────
 
+
 (async () => {
   try {
     await jobs.jobFetchDailyFixtures();
@@ -76,3 +77,15 @@ cron.schedule(config.cron.dailyFixtures, safeJob("dailyFixtures", async () => {
     console.error("❌ Startup error:", e.message);
   }
 })();
+
+
+// ── Keep-alive server for Render ──────────────────────────
+const http = require("http");
+const PORT = process.env.PORT || 3000;
+
+http.createServer((req, res) => {
+  res.writeHead(200);
+  res.end("Bot is alive!");
+}).listen(PORT, () => {
+  console.log(`🌐 Keep-alive server on port ${PORT}`);
+});
