@@ -49,8 +49,8 @@ cron.schedule("0 */2 10-23 * * *", safeJob("liveScores", async () => {
   await jobs.jobLiveNHL();
 }));
 
-// News — every 2 hrs
-cron.schedule(config.cron.news, safeJob("news", jobs.jobNews));
+// // News — every 2 hrs
+// cron.schedule(config.cron.news, safeJob("news", jobs.jobNews));
 
 // Pre-match alerts — top of every hour
 cron.schedule(config.cron.preMatch, safeJob("preMatch", jobs.jobPreMatch));

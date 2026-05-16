@@ -250,7 +250,7 @@ function normaliseFDMatch(m) {
     home_score:  m.score?.fullTime?.home ?? m.score?.halfTime?.home ?? 0,
     away_score:  m.score?.fullTime?.away ?? m.score?.halfTime?.away ?? 0,
     status:      m.status,
-    minute:      m.minute ?? null,
+    minute: m.minute ?? m.score?.minute ?? null,
     league_name: league.name,
     league_tag:  league.tag,
     kickoff_utc: new Date(m.utcDate).getTime(),
