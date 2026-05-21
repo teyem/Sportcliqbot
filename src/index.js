@@ -41,16 +41,16 @@ function safeJob(name, fn) {
 
 // ── Register cron jobs ────────────────────────────────────────────────────────
 
-// Live scores — every 2 minutes during match hours
+// Live scores — every 2 minutes during match hours (football only)
 cron.schedule("0 */2 10-23 * * *", safeJob("liveScores", async () => {
   await jobs.jobLiveSoccer();
-  await jobs.jobLiveNBA();
-  await jobs.jobLiveNFL();
-  await jobs.jobLiveNHL();
+  // await jobs.jobLiveNBA();   // commented out — not active
+  // await jobs.jobLiveNFL();   // commented out — not active
+  // await jobs.jobLiveNHL();   // commented out — not active
 }));
 
-// // News — every 2 hrs
-// cron.schedule(config.cron.news, safeJob("news", jobs.jobNews));
+// News — every 2 hrs
+cron.schedule(config.cron.news, safeJob("news", jobs.jobNews));
 
 // Pre-match alerts — top of every hour
 cron.schedule(config.cron.preMatch, safeJob("preMatch", jobs.jobPreMatch));
@@ -62,7 +62,6 @@ cron.schedule(config.cron.dailyFixtures, safeJob("dailyFixtures", async () => {
 }));
 
 // ── Run once on startup ───────────────────────────────────────────────────────
-
 
 (async () => {
   try {
@@ -78,8 +77,7 @@ cron.schedule(config.cron.dailyFixtures, safeJob("dailyFixtures", async () => {
   }
 })();
 
-
-// ── Keep-alive server for Render ──────────────────────────
+// ── Keep-alive server for Render ──────────────────────────────────────────────
 const http = require("http");
 const PORT = process.env.PORT || 3000;
 

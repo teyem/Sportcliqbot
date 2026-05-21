@@ -1,9 +1,7 @@
 // src/jobs.js
 // ─────────────────────────────────────────────────────────────────────────────
-// All scheduled jobs
-// Soccer live scores  → football-data.org
-// NBA/NFL/NHL live    → ESPN unofficial API
-// News               → Google News RSS
+// Active jobs:   Soccer (EPL, UCL, World Cup), News, Pre-match, Daily fixtures
+// Commented out: NBA, NFL, NHL
 // ─────────────────────────────────────────────────────────────────────────────
 
 const Parser = require("rss-parser");
@@ -87,128 +85,109 @@ async function jobLiveSoccer() {
   }
 }
 
-// ── Job 2: Live NBA scores (ESPN) ─────────────────────────────────────────────
+// ── Job 2: Live NBA scores (ESPN) — COMMENTED OUT ─────────────────────────────
 
-async function jobLiveNBA() {
-  const games = await api.getLiveNBAGames();
+// async function jobLiveNBA() {
+//   const games = await api.getLiveNBAGames();
+//   for (const g of games) {
+//     const e   = api.normaliseESPNEvent(g);
+//     const key = `nba-live-${e.id}-${e.home_score}-${e.away_score}-q${e.period}`;
+//     if (db.hasPosted(key)) continue;
+//     const league = config.leagues.basketball[0];
+//     const msg    = fmt.basketballLiveUpdate({
+//       home: e.home_team, away: e.away_team,
+//       homeScore: e.home_score, awayScore: e.away_score,
+//       period: e.period, clock: e.clock,
+//       leagueTag: league.tag,
+//     });
+//     await send(msg);
+//     db.markPosted(key, "nba-live");
+//     console.log(`🏀 NBA Live Q${e.period}: ${e.home_team} ${e.home_score}-${e.away_score} ${e.away_team}`);
+//   }
+//   const finished = await api.getFinishedNBAGames();
+//   for (const g of finished) {
+//     const e   = api.normaliseESPNEvent(g);
+//     const key = `nba-ft-${e.id}`;
+//     if (db.hasPosted(key)) continue;
+//     const league = config.leagues.basketball[0];
+//     const msg    = fmt.basketballFinalResult({
+//       home: e.home_team, away: e.away_team,
+//       homeScore: e.home_score, awayScore: e.away_score,
+//       leagueName: league.name, leagueTag: league.tag,
+//     });
+//     await send(msg);
+//     db.markPosted(key, "nba-ft");
+//     console.log(`🏁 NBA FT: ${e.home_team} ${e.home_score}-${e.away_score} ${e.away_team}`);
+//   }
+// }
 
-  for (const g of games) {
-    const e   = api.normaliseESPNEvent(g);
-    const key = `nba-live-${e.id}-${e.home_score}-${e.away_score}-q${e.period}`;
-    if (db.hasPosted(key)) continue;
+// ── Job 3: Live NFL scores (ESPN) — COMMENTED OUT ─────────────────────────────
 
-    const league = config.leagues.basketball[0];
-    const msg    = fmt.basketballLiveUpdate({
-      home: e.home_team, away: e.away_team,
-      homeScore: e.home_score, awayScore: e.away_score,
-      period: e.period, clock: e.clock,
-      leagueTag: league.tag,
-    });
+// async function jobLiveNFL() {
+//   const games = await api.getLiveNFLGames();
+//   for (const g of games) {
+//     const e   = api.normaliseESPNEvent(g);
+//     const key = `nfl-live-${e.id}-${e.home_score}-${e.away_score}-q${e.period}`;
+//     if (db.hasPosted(key)) continue;
+//     const msg = fmt.nflLiveUpdate({
+//       home: e.home_team, away: e.away_team,
+//       homeScore: e.home_score, awayScore: e.away_score,
+//       quarter: e.period, clock: e.clock,
+//     });
+//     await send(msg);
+//     db.markPosted(key, "nfl-live");
+//     console.log(`🏈 NFL Live Q${e.period}: ${e.home_team} ${e.home_score}-${e.away_score} ${e.away_team}`);
+//   }
+//   const finished = await api.getFinishedNFLGames();
+//   for (const g of finished) {
+//     const e   = api.normaliseESPNEvent(g);
+//     const key = `nfl-ft-${e.id}`;
+//     if (db.hasPosted(key)) continue;
+//     const msg = fmt.nflFinalResult({
+//       home: e.home_team, away: e.away_team,
+//       homeScore: e.home_score, awayScore: e.away_score,
+//     });
+//     await send(msg);
+//     db.markPosted(key, "nfl-ft");
+//     console.log(`🏁 NFL FT: ${e.home_team} ${e.home_score}-${e.away_score} ${e.away_team}`);
+//   }
+// }
 
-    await send(msg);
-    db.markPosted(key, "nba-live");
-    console.log(`🏀 NBA Live Q${e.period}: ${e.home_team} ${e.home_score}-${e.away_score} ${e.away_team}`);
-  }
+// ── Job 4: Live NHL scores (ESPN) — COMMENTED OUT ─────────────────────────────
 
-  // Final results
-  const finished = await api.getFinishedNBAGames();
-  for (const g of finished) {
-    const e   = api.normaliseESPNEvent(g);
-    const key = `nba-ft-${e.id}`;
-    if (db.hasPosted(key)) continue;
-
-    const league = config.leagues.basketball[0];
-    const msg    = fmt.basketballFinalResult({
-      home: e.home_team, away: e.away_team,
-      homeScore: e.home_score, awayScore: e.away_score,
-      leagueName: league.name, leagueTag: league.tag,
-    });
-
-    await send(msg);
-    db.markPosted(key, "nba-ft");
-    console.log(`🏁 NBA FT: ${e.home_team} ${e.home_score}-${e.away_score} ${e.away_team}`);
-  }
-}
-
-// ── Job 3: Live NFL scores (ESPN) ─────────────────────────────────────────────
-
-async function jobLiveNFL() {
-  const games = await api.getLiveNFLGames();
-
-  for (const g of games) {
-    const e   = api.normaliseESPNEvent(g);
-    const key = `nfl-live-${e.id}-${e.home_score}-${e.away_score}-q${e.period}`;
-    if (db.hasPosted(key)) continue;
-
-    const msg = fmt.nflLiveUpdate({
-      home: e.home_team, away: e.away_team,
-      homeScore: e.home_score, awayScore: e.away_score,
-      quarter: e.period, clock: e.clock,
-    });
-
-    await send(msg);
-    db.markPosted(key, "nfl-live");
-    console.log(`🏈 NFL Live Q${e.period}: ${e.home_team} ${e.home_score}-${e.away_score} ${e.away_team}`);
-  }
-
-  const finished = await api.getFinishedNFLGames();
-  for (const g of finished) {
-    const e   = api.normaliseESPNEvent(g);
-    const key = `nfl-ft-${e.id}`;
-    if (db.hasPosted(key)) continue;
-
-    const msg = fmt.nflFinalResult({
-      home: e.home_team, away: e.away_team,
-      homeScore: e.home_score, awayScore: e.away_score,
-    });
-
-    await send(msg);
-    db.markPosted(key, "nfl-ft");
-    console.log(`🏁 NFL FT: ${e.home_team} ${e.home_score}-${e.away_score} ${e.away_team}`);
-  }
-}
-
-// ── Job 4: Live NHL scores (ESPN) ─────────────────────────────────────────────
-
-async function jobLiveNHL() {
-  const games = await api.getLiveNHLGames();
-
-  for (const g of games) {
-    const e   = api.normaliseESPNEvent(g);
-    const key = `nhl-live-${e.id}-${e.home_score}-${e.away_score}-p${e.period}`;
-    if (db.hasPosted(key)) continue;
-
-    const msg = fmt.nhlLiveUpdate({
-      home: e.home_team, away: e.away_team,
-      homeScore: e.home_score, awayScore: e.away_score,
-      period: e.period, clock: e.clock,
-    });
-
-    await send(msg);
-    db.markPosted(key, "nhl-live");
-    console.log(`🏒 NHL Live P${e.period}: ${e.home_team} ${e.home_score}-${e.away_score} ${e.away_team}`);
-  }
-
-  const finished = await api.getFinishedNHLGames();
-  for (const g of finished) {
-    const e   = api.normaliseESPNEvent(g);
-    const key = `nhl-ft-${e.id}`;
-    if (db.hasPosted(key)) continue;
-
-    const msg = fmt.nhlFinalResult({
-      home: e.home_team, away: e.away_team,
-      homeScore: e.home_score, awayScore: e.away_score,
-    });
-
-    await send(msg);
-    db.markPosted(key, "nhl-ft");
-    console.log(`🏁 NHL FT: ${e.home_team} ${e.home_score}-${e.away_score} ${e.away_team}`);
-  }
-}
+// async function jobLiveNHL() {
+//   const games = await api.getLiveNHLGames();
+//   for (const g of games) {
+//     const e   = api.normaliseESPNEvent(g);
+//     const key = `nhl-live-${e.id}-${e.home_score}-${e.away_score}-p${e.period}`;
+//     if (db.hasPosted(key)) continue;
+//     const msg = fmt.nhlLiveUpdate({
+//       home: e.home_team, away: e.away_team,
+//       homeScore: e.home_score, awayScore: e.away_score,
+//       period: e.period, clock: e.clock,
+//     });
+//     await send(msg);
+//     db.markPosted(key, "nhl-live");
+//     console.log(`🏒 NHL Live P${e.period}: ${e.home_team} ${e.home_score}-${e.away_score} ${e.away_team}`);
+//   }
+//   const finished = await api.getFinishedNHLGames();
+//   for (const g of finished) {
+//     const e   = api.normaliseESPNEvent(g);
+//     const key = `nhl-ft-${e.id}`;
+//     if (db.hasPosted(key)) continue;
+//     const msg = fmt.nhlFinalResult({
+//       home: e.home_team, away: e.away_team,
+//       homeScore: e.home_score, awayScore: e.away_score,
+//     });
+//     await send(msg);
+//     db.markPosted(key, "nhl-ft");
+//     console.log(`🏁 NHL FT: ${e.home_team} ${e.home_score}-${e.away_score} ${e.away_team}`);
+//   }
+// }
 
 // ── Job 5: Sports news (Google News RSS) ─────────────────────────────────────
 
-let newsFeedIndex = 0; // tracks which feed to post next
+let newsFeedIndex = 0;
 
 async function jobNews() {
   const feed = config.newsFeeds[newsFeedIndex];
@@ -235,7 +214,7 @@ async function jobNews() {
       await send(msg);
       db.markPostedNews(url);
       console.log(`📰 News [${feed.name}]: ${item.title?.slice(0, 60)}`);
-      break; // only 1 per run
+      break;
     }
   } catch (e) {
     console.error(`❌ RSS error (${feed.name}):`, e.message);
@@ -259,17 +238,18 @@ async function jobPreMatch() {
         leagueName: f.league_name ?? "",
         leagueTag:  f.league_tag  ?? "\\#Football",
       });
-    } else if (f.sport === "basketball") {
-      msg = fmt.basketballPreMatch({
-        home: f.home_team, away: f.away_team, kickoff,
-        leagueName: f.league_name ?? "NBA",
-        leagueTag:  "\\#NBA",
-      });
-    } else if (f.sport === "americanfootball") {
-      msg = fmt.nflPreMatch({ home: f.home_team, away: f.away_team, kickoff });
-    } else if (f.sport === "hockey") {
-      msg = fmt.nhlPreMatch({ home: f.home_team, away: f.away_team, kickoff });
     }
+    // else if (f.sport === "basketball") {
+    //   msg = fmt.basketballPreMatch({
+    //     home: f.home_team, away: f.away_team, kickoff,
+    //     leagueName: f.league_name ?? "NBA",
+    //     leagueTag:  "\\#NBA",
+    //   });
+    // } else if (f.sport === "americanfootball") {
+    //   msg = fmt.nflPreMatch({ home: f.home_team, away: f.away_team, kickoff });
+    // } else if (f.sport === "hockey") {
+    //   msg = fmt.nhlPreMatch({ home: f.home_team, away: f.away_team, kickoff });
+    // }
 
     if (msg) {
       await send(msg);
@@ -284,7 +264,7 @@ async function jobPreMatch() {
 async function jobFetchDailyFixtures() {
   console.log("📅 Fetching today's fixtures...");
 
-  // Soccer via football-data.org
+  // Soccer via football-data.org (EPL, UCL, World Cup)
   const soccerMatches = await api.getTodaySoccerFixtures();
   for (const m of soccerMatches) {
     const f = api.normaliseFDMatch(m);
@@ -301,51 +281,51 @@ async function jobFetchDailyFixtures() {
     });
   }
 
-  // NBA via ESPN
-  const nbaGames = await api.getTodayNBAGames();
-  for (const g of nbaGames) {
-    const e = api.normaliseESPNEvent(g);
-    db.upsertFixture({
-      fixture_id:  e.id,
-      sport:       "basketball",
-      league_name: "NBA",
-      league_tag:  "#NBA",
-      home_team:   e.home_team,
-      away_team:   e.away_team,
-      kickoff_utc: new Date(g.date).getTime(),
-      status:      "NS",
-    });
-  }
+  // // NBA via ESPN
+  // const nbaGames = await api.getTodayNBAGames();
+  // for (const g of nbaGames) {
+  //   const e = api.normaliseESPNEvent(g);
+  //   db.upsertFixture({
+  //     fixture_id:  e.id,
+  //     sport:       "basketball",
+  //     league_name: "NBA",
+  //     league_tag:  "#NBA",
+  //     home_team:   e.home_team,
+  //     away_team:   e.away_team,
+  //     kickoff_utc: new Date(g.date).getTime(),
+  //     status:      "NS",
+  //   });
+  // }
 
-  // NFL via ESPN
-  const nflGames = await api.getTodayNFLGames();
-  for (const g of nflGames) {
-    const e = api.normaliseESPNEvent(g);
-    db.upsertFixture({
-      fixture_id:  e.id,
-      sport:       "americanfootball",
-      league_name: "NFL",
-      home_team:   e.home_team,
-      away_team:   e.away_team,
-      kickoff_utc: new Date(g.date).getTime(),
-      status:      "NS",
-    });
-  }
+  // // NFL via ESPN
+  // const nflGames = await api.getTodayNFLGames();
+  // for (const g of nflGames) {
+  //   const e = api.normaliseESPNEvent(g);
+  //   db.upsertFixture({
+  //     fixture_id:  e.id,
+  //     sport:       "americanfootball",
+  //     league_name: "NFL",
+  //     home_team:   e.home_team,
+  //     away_team:   e.away_team,
+  //     kickoff_utc: new Date(g.date).getTime(),
+  //     status:      "NS",
+  //   });
+  // }
 
-  // NHL via ESPN
-  const nhlGames = await api.getTodayNHLGames();
-  for (const g of nhlGames) {
-    const e = api.normaliseESPNEvent(g);
-    db.upsertFixture({
-      fixture_id:  e.id,
-      sport:       "hockey",
-      league_name: "NHL",
-      home_team:   e.home_team,
-      away_team:   e.away_team,
-      kickoff_utc: new Date(g.date).getTime(),
-      status:      "NS",
-    });
-  }
+  // // NHL via ESPN
+  // const nhlGames = await api.getTodayNHLGames();
+  // for (const g of nhlGames) {
+  //   const e = api.normaliseESPNEvent(g);
+  //   db.upsertFixture({
+  //     fixture_id:  e.id,
+  //     sport:       "hockey",
+  //     league_name: "NHL",
+  //     home_team:   e.home_team,
+  //     away_team:   e.away_team,
+  //     kickoff_utc: new Date(g.date).getTime(),
+  //     status:      "NS",
+  //   });
+  // }
 
   console.log("✅ Today's fixtures cached");
 }
@@ -359,9 +339,9 @@ function sleep(ms) {
 module.exports = {
   init,
   jobLiveSoccer,
-  jobLiveNBA,
-  jobLiveNFL,
-  jobLiveNHL,
+  // jobLiveNBA,   // commented out — not active
+  // jobLiveNFL,   // commented out — not active
+  // jobLiveNHL,   // commented out — not active
   jobNews,
   jobPreMatch,
   jobFetchDailyFixtures,
