@@ -11,10 +11,13 @@ const FOOTER = `\n\n🔗 [Join our waitlist here](https://www.getsportcliq.com)`
 // ── Soccer ────────────────────────────────────────────────────────────────────
 
 function soccerGoal({ home, away, homeScore, awayScore, scorer, minute, leagueTag }) {
+  // Safety net: never post a goal alert at 0–0
+  if ((homeScore ?? 0) + (awayScore ?? 0) === 0) return null;
+
   return (
     `⚽ *GOAL\\!* ${escMd(home)} ${homeScore}–${awayScore} ${escMd(away)}${minute ? ` *\\(${minute}'\\)*` : ""}\n` +
     (scorer ? `👤 ${escMd(scorer)}\n` : "") +
-    `\n${escMd(leagueTag)} \\#Football`+
+    `\n${escMd(leagueTag)} \\#Football` +
     FOOTER
   );
 }

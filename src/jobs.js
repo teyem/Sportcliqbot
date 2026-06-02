@@ -49,6 +49,11 @@ async function jobLiveSoccer() {
 
   for (const m of matches) {
     const f   = api.normaliseFDMatch(m);
+
+    // ── Only fire goal alert if someone has actually scored ──
+    const totalGoals = (f.home_score ?? 0) + (f.away_score ?? 0);
+    if (totalGoals === 0) continue;
+
     const key = `soccer-live-${f.id}-${f.home_score}-${f.away_score}`;
     if (db.hasPosted(key)) continue;
 
@@ -60,28 +65,12 @@ async function jobLiveSoccer() {
       leagueTag: f.league_tag,
     });
 
-    await send(msg);
-    db.markPosted(key, "soccer-live");
-    console.log(`⚽ Live: ${f.home_team} ${f.home_score}-${f.away_score} ${f.away_team}`);
-  }
-
-  // Post finished results
-  const finished = await api.getFinishedSoccerMatches();
-  for (const m of finished) {
-    const f   = api.normaliseFDMatch(m);
-    const key = `soccer-ft-${f.id}`;
-    if (db.hasPosted(key)) continue;
-
-    const msg = fmt.soccerFinalResult({
-      home: f.home_team, away: f.away_team,
-      homeScore: f.home_score, awayScore: f.away_score,
-      leagueName: f.league_name,
-      leagueTag:  f.league_tag,
-    });
-
-    await send(msg);
-    db.markPosted(key, "soccer-ft");
-    console.log(`🏁 Soccer FT: ${f.home_team} ${f.home_score}-${f.away_score} ${f.away_team}`);
+    // AFTER
+    if (msg) {
+      await send(msg);
+      db.markPosted(key, "soccer-live");
+      console.log(`⚽ Goal: ${f.home_team} ${f.home_score}-${f.away_score} ${f.away_team}`);
+    }
   }
 }
 
