@@ -42,7 +42,8 @@ function safeJob(name, fn) {
 // ── Register cron jobs ────────────────────────────────────────────────────────
 
 // Live scores — every 2 minutes during match hours (football only)
-cron.schedule("0 */2 10-23 * * *", safeJob("liveScores", async () => {
+// src/index.js
+cron.schedule(config.cron.liveScores, safeJob("liveScores", async () => {
   await jobs.jobLiveSoccer();
   // await jobs.jobLiveNBA();   // commented out — not active
   // await jobs.jobLiveNFL();   // commented out — not active

@@ -4,8 +4,6 @@
 // Each function returns a string ready to send.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const { leagues, sportEmoji } = require("./config");
-
 const FOOTER = `\n\n🔗 [Join our waitlist here](https://www.getsportcliq.com)`;
 
 // ── Soccer ────────────────────────────────────────────────────────────────────
@@ -15,9 +13,20 @@ function soccerGoal({ home, away, homeScore, awayScore, scorer, minute, leagueTa
   if ((homeScore ?? 0) + (awayScore ?? 0) === 0) return null;
 
   return (
-    `⚽ *GOAL\\!* ${escMd(home)} ${homeScore}–${awayScore} ${escMd(away)}${minute ? ` *\\(${minute}'\\)*` : ""}\n` +
+    `⚽ *GOAL\\!* ${escMd(home)} ${homeScore}–${awayScore} ${escMd(away)}` +
+    (minute ? ` *\\(${minute}'\\)*` : "") +
+    `\n` +
     (scorer ? `👤 ${escMd(scorer)}\n` : "") +
     `\n${escMd(leagueTag)} \\#Football` +
+    FOOTER
+  );
+}
+
+function soccerHalfTime({ home, away, homeScore, awayScore, leagueTag }) {
+  return (
+    `⏸ *HALF TIME*\n` +
+    `${escMd(home)} *${homeScore}–${awayScore}* ${escMd(away)}\n` +
+    `\n${escMd(leagueTag)} \\#Football \\#HT` +
     FOOTER
   );
 }
@@ -27,7 +36,7 @@ function soccerFinalResult({ home, away, homeScore, awayScore, leagueName, leagu
     `🏁 *FULL TIME*\n` +
     `${escMd(home)} *${homeScore}–${awayScore}* ${escMd(away)}\n` +
     `📋 ${escMd(leagueName)}\n` +
-    `\n${escMd(leagueTag)} \\#Football \\#FT`+
+    `\n${escMd(leagueTag)} \\#Football \\#FT` +
     FOOTER
   );
 }
@@ -38,103 +47,28 @@ function soccerPreMatch({ home, away, kickoff, leagueName, leagueTag }) {
     `${escMd(home)} 🆚 ${escMd(away)}\n` +
     `⏰ ${escMd(kickoff)} \\(UTC\\)\n` +
     `📋 ${escMd(leagueName)}\n` +
-    `\n${escMd(leagueTag)} \\#Football`+
+    `\n${escMd(leagueTag)} \\#Football` +
     FOOTER
   );
 }
 
-// ── Basketball ────────────────────────────────────────────────────────────────
+// ── Basketball (commented out but kept for future use) ────────────────────────
 
-function basketballLiveUpdate({ home, away, homeScore, awayScore, period, clock, leagueTag }) {
-  return (
-    `🏀 *LIVE* — Q${period} ${escMd(clock || "")}\n` +
-    `${escMd(home)} *${homeScore}–${awayScore}* ${escMd(away)}\n` +
-    `\n${escMd(leagueTag)} \\#Basketball`+
-    FOOTER
-  );
-}
+// function basketballLiveUpdate(...) { ... }
+// function basketballFinalResult(...) { ... }
+// function basketballPreMatch(...) { ... }
 
-function basketballFinalResult({ home, away, homeScore, awayScore, leagueName, leagueTag }) {
-  return (
-    `🏁 *FINAL*\n` +
-    `${escMd(home)} *${homeScore}–${awayScore}* ${escMd(away)}\n` +
-    `📋 ${escMd(leagueName)}\n` +
-    `\n${escMd(leagueTag)} \\#Basketball`+
-    FOOTER
-  );
-}
+// ── American Football (commented out) ────────────────────────────────────────
 
-function basketballPreMatch({ home, away, kickoff, leagueName, leagueTag }) {
-  return (
-    `🕐 *UPCOMING GAME*\n` +
-    `${escMd(home)} 🆚 ${escMd(away)}\n` +
-    `⏰ ${escMd(kickoff)} \\(UTC\\)\n` +
-    `📋 ${escMd(leagueName)}\n` +
-    `\n${escMd(leagueTag)} \\#Basketball`+
-    FOOTER
-  );
-}
+// function nflLiveUpdate(...) { ... }
+// function nflFinalResult(...) { ... }
+// function nflPreMatch(...) { ... }
 
-// ── American Football ─────────────────────────────────────────────────────────
+// ── Ice Hockey (commented out) ────────────────────────────────────────────────
 
-function nflLiveUpdate({ home, away, homeScore, awayScore, quarter, clock }) {
-  return (
-    `🏈 *LIVE* — Q${quarter} ${escMd(clock || "")}\n` +
-    `${escMd(home)} *${homeScore}–${awayScore}* ${escMd(away)}\n` +
-    `\n\\#NFL \\#AmericanFootball`+
-    FOOTER
-  );
-}
-
-function nflFinalResult({ home, away, homeScore, awayScore }) {
-  return (
-    `🏁 *FINAL — NFL*\n` +
-    `${escMd(home)} *${homeScore}–${awayScore}* ${escMd(away)}\n` +
-    `\n\\#NFL \\#AmericanFootball`+
-    FOOTER
-  );
-}
-
-function nflPreMatch({ home, away, kickoff }) {
-  return (
-    `🕐 *UPCOMING NFL GAME*\n` +
-    `${escMd(home)} 🆚 ${escMd(away)}\n` +
-    `⏰ ${escMd(kickoff)} \\(UTC\\)\n` +
-    `\n\\#NFL \\#AmericanFootball`+
-    FOOTER
-  );
-}
-
-// ── Ice Hockey ────────────────────────────────────────────────────────────────
-
-function nhlLiveUpdate({ home, away, homeScore, awayScore, period, clock }) {
-  const periodLabel = period <= 3 ? `P${period}` : "OT";
-  return (
-    `🏒 *LIVE* — ${periodLabel} ${escMd(clock || "")}\n` +
-    `${escMd(home)} *${homeScore}–${awayScore}* ${escMd(away)}\n` +
-    `\n\\#NHL \\#IceHockey`+
-    FOOTER
-  );
-}
-
-function nhlFinalResult({ home, away, homeScore, awayScore }) {
-  return (
-    `🏁 *FINAL — NHL*\n` +
-    `${escMd(home)} *${homeScore}–${awayScore}* ${escMd(away)}\n` +
-    `\n\\#NHL \\#IceHockey`+
-    FOOTER
-  );
-}
-
-function nhlPreMatch({ home, away, kickoff }) {
-  return (
-    `🕐 *UPCOMING NHL GAME*\n` +
-    `${escMd(home)} 🆚 ${escMd(away)}\n` +
-    `⏰ ${escMd(kickoff)} \\(UTC\\)\n` +
-    `\n\\#NHL \\#IceHockey`+
-    FOOTER
-  );
-}
+// function nhlLiveUpdate(...) { ... }
+// function nhlFinalResult(...) { ... }
+// function nhlPreMatch(...) { ... }
 
 // ── News ──────────────────────────────────────────────────────────────────────
 
@@ -142,7 +76,7 @@ function newsArticle({ title, source, url }) {
   return (
     `📰 *${escMd(title)}*\n` +
     `🔗 [Read more on ${escMd(source)}](${url})\n` +
-    `\n\\#SportNews`+
+    `\n\\#SportNews` +
     FOOTER
   );
 }
@@ -160,10 +94,11 @@ function formatTime(utcMs) {
 }
 
 module.exports = {
-  soccerGoal, soccerFinalResult, soccerPreMatch,
-  basketballLiveUpdate, basketballFinalResult, basketballPreMatch,
-  nflLiveUpdate, nflFinalResult, nflPreMatch,
-  nhlLiveUpdate, nhlFinalResult, nhlPreMatch,
+  soccerGoal,
+  soccerHalfTime,
+  soccerFinalResult,
+  soccerPreMatch,
   newsArticle,
-  escMd, formatTime,
+  escMd,
+  formatTime,
 };
