@@ -270,7 +270,6 @@ function currentSeason() {
 module.exports = {
   // Soccer
   getLiveSoccerFixtures,
-  getFinishedSoccerMatches,
   getTodaySoccerFixtures,
   normaliseFDMatch,
   // NBA — commented out
