@@ -31,36 +31,32 @@ const FD_COMPETITIONS = ["PL", "CL", "WC"];
 // Commented out: "PD" (La Liga), "SA" (Serie A), "BL1" (Bundesliga),
 //                "FL1" (Ligue 1), "EL" (Europa League), "CLI" (Copa Libertadores)
 
+
+
 // ── Soccer Live Scores (football-data.org) ────────────────────────────────────
 
-async function getLiveSoccerFixtures() {
-  try {
-    const res = await footballData.get("/matches", {
-      params: { status: "LIVE,IN_PLAY,PAUSED" },
-    });
-    return (res.data.matches ?? []).filter((m) =>
-      FD_COMPETITIONS.includes(m.competition?.code)
-    );
-  } catch (e) {
-    console.error("❌ getLiveSoccerFixtures:", e.message);
-    return [];
+async function getLiveSoccerFixtures(retries = 2) {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const res = await footballData.get("/matches", {
+        params: { status: "LIVE,IN_PLAY,PAUSED" },
+      });
+      return (res.data.matches ?? []).filter((m) =>
+        FD_COMPETITIONS.includes(m.competition?.code)
+      );
+    } catch (e) {
+      const isLast = attempt === retries;
+      console.error(
+        `❌ getLiveSoccerFixtures (attempt ${attempt + 1}/${retries + 1}):`,
+        e.message
+      );
+      if (isLast) return [];
+      await sleep(3000); // wait 3s before retrying
+    }
   }
+  return [];
 }
 
-async function getFinishedSoccerMatches() {
-  try {
-    const today = new Date().toISOString().slice(0, 10);
-    const res   = await footballData.get("/matches", {
-      params: { status: "FINISHED", dateFrom: today, dateTo: today },
-    });
-    return (res.data.matches ?? []).filter((m) =>
-      FD_COMPETITIONS.includes(m.competition?.code)
-    );
-  } catch (e) {
-    console.error("❌ getFinishedSoccerMatches:", e.message);
-    return [];
-  }
-}
 
 async function getTodaySoccerFixtures() {
   try {
