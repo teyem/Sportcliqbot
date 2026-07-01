@@ -5,13 +5,15 @@
 
 module.exports = {
   // ── League definitions ────────────────────────────────────────────────────
-  leagues: {
-    soccer: [
-      { id: 4328, name: "Premier League",   flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", tag: "#EPL"      },
-      { id: 4480, name: "Champions League", flag: "🏆",      tag: "#UCL"      },
-      { id: 4429, name: "World Cup",        flag: "🌍",      tag: "#WorldCup" },
-    ],
-  },
+ leagues: {
+  soccer: [
+    // API-Football (api-sports.io) league IDs — different scheme to the old
+    // football-data.org codes and to the old (unused) TheSportsDB ids.
+    { id: 39, name: "Premier League",   flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", tag: "#EPL"      },
+    { id: 2,  name: "Champions League", flag: "🏆",      tag: "#UCL"      },
+    { id: 1,  name: "World Cup",        flag: "🌍",      tag: "#WorldCup" },
+  ],
+},
 
   // ── Cron schedules (UTC, 6-field with seconds) ────────────────────────────
   cron: {

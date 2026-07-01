@@ -1,49 +1,73 @@
 // src/api.js
 // ─────────────────────────────────────────────────────────────────────────────
 // Live scores:
-//   Soccer  → football-data.org (EPL, UCL, World Cup only)
-//   NBA/NFL/NHL → ESPN unofficial API (commented out — not active)
+//   Soccer (EPL, UCL, World Cup) → API-Football (api-sports.io), v3
+//   NBA/NFL/NHL → not active
 // ─────────────────────────────────────────────────────────────────────────────
 
-const axios = require("axios");
+const axios  = require("axios");
+const config = require("./config");
 
-// ── Clients ───────────────────────────────────────────────────────────────────
+// ── Client ────────────────────────────────────────────────────────────────────
 
-const footballData = axios.create({
-  baseURL: "https://api.football-data.org/v4",
-  headers: { "X-Auth-Token": process.env.FOOTBALL_DATA_KEY },
-  timeout: 15000, // reduced from 30s — fail fast and retry
+const apiFootball = axios.create({
+  baseURL: "https://v3.football.api-sports.io",
+  headers: { "x-apisports-key": process.env.API_FOOTBALL_KEY },
+  timeout: 15000,
 });
 
-const sportsdb = axios.create({
-  baseURL: "https://www.thesportsdb.com/api/v1/json/123",
-  timeout: 10000,
-});
+// ── League map (single source of truth in config.js) ─────────────────────────
+// API-Football league IDs — different scheme to the old football-data.org codes
+// and to the old (unused) TheSportsDB ids: EPL=39, UCL=2, World Cup=1.
 
-// ── Competition codes for football-data.org ───────────────────────────────────
-const FD_COMPETITIONS = ["PL", "CL", "WC"];
+const AF_LEAGUES = Object.fromEntries(
+  config.leagues.soccer.map((l) => [l.id, { name: l.name, tag: l.tag }])
+);
+const AF_LEAGUE_IDS = config.leagues.soccer.map((l) => l.id);
+
+// ── Status buckets ────────────────────────────────────────────────────────────
+// Real status codes from the API, so no more "kickoff + 115 min" guessing.
+
+const LIVE_STATUSES     = ["1H", "HT", "2H", "ET", "BT", "P", "SUSP", "INT", "LIVE"];
+const FINISHED_STATUSES = ["FT", "AET", "PEN"];
 
 // ── Shared fetch helper with exponential backoff ──────────────────────────────
-// Keeps total API calls predictable so we never blow past 10 req/min
+// API-Football can rate-limit two ways: a genuine HTTP 429, or a 200 response
+// with `errors.rateLimit` set in the body. We handle both.
 
-async function fdGet(path, params, retries = 2) {
+async function afGet(path, params, retries = 2) {
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
-      const res = await footballData.get(path, { params });
+      const res    = await apiFootball.get(path, { params });
+      const errors = res.data?.errors;
+      const hasErrors = errors && (Array.isArray(errors) ? errors.length : Object.keys(errors).length);
+
+      if (hasErrors) {
+        if (errors.rateLimit) {
+          const isLast = attempt === retries;
+          console.warn(`⏳ Rate limited by API-Football (soft) — backing off`);
+          if (isLast) throw new Error(errors.rateLimit);
+          await sleep(Math.pow(2, attempt + 1) * 1000);
+          continue;
+        }
+        // Non rate-limit API errors (bad params etc) — log, return as-is
+        console.error(`❌ afGet ${path} API error:`, JSON.stringify(errors));
+      }
+
       return res.data;
     } catch (e) {
       const isLast = attempt === retries;
       const code   = e.response?.status;
 
-      // 429 = rate limited — back off hard
+      // 429 = hard rate limited — back off per Retry-After if present
       if (code === 429) {
         const retryAfter = Number(e.response?.headers?.["retry-after"] ?? 60);
-        console.warn(`⏳ Rate limited by football-data.org — waiting ${retryAfter}s`);
+        console.warn(`⏳ Rate limited (429) by API-Football — waiting ${retryAfter}s`);
         await sleep(retryAfter * 1000);
         continue;
       }
 
-      console.error(`❌ fdGet ${path} (attempt ${attempt + 1}/${retries + 1}): ${e.message}`);
+      console.error(`❌ afGet ${path} (attempt ${attempt + 1}/${retries + 1}): ${e.message}`);
       if (isLast) throw e;
 
       // Exponential backoff: 1s, 2s
@@ -53,37 +77,39 @@ async function fdGet(path, params, retries = 2) {
 }
 
 // ── Soccer Live Scores ────────────────────────────────────────────────────────
+// One call covers all three leagues at once via the hyphen-joined `live` param.
 
 async function getLiveSoccerFixtures() {
   try {
-    const data = await fdGet("/matches", { status: "IN_PLAY,PAUSED" });
-    return (data.matches ?? []).filter((m) =>
-      FD_COMPETITIONS.includes(m.competition?.code)
-    );
+    const data = await afGet("/fixtures", { live: AF_LEAGUE_IDS.join("-") });
+    return data?.response ?? [];
   } catch {
     return [];
   }
 }
 
 // ── Recently Finished Soccer Matches ─────────────────────────────────────────
-// Fetches FINISHED matches and filters to those that likely ended recently.
-// We can't know exact end time from football-data.org, so we approximate:
-//   kickoff + 115 minutes (90 min + avg stoppage + buffer) as the "ended after" threshold.
-// This means a match kicked off up to ~115 min ago will still be caught.
+// Status is authoritative now (FT/AET/PEN), so no more approximation — we just
+// pull today's + yesterday's date (covers matches that started before midnight
+// UTC and finished after) and filter to our leagues + finished statuses.
+// The existing db dedup (soccer-ft-{id}) means re-fetching yesterday is cheap
+// and harmless — already-posted results get skipped.
 
 async function getRecentlyFinishedSoccer() {
   try {
-    const data = await fdGet("/matches", { status: "FINISHED" });
-    const now  = Date.now();
+    const today     = new Date();
+    const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+    const dates     = [today, yesterday].map((d) => d.toISOString().slice(0, 10));
 
-    return (data.matches ?? []).filter((m) => {
-      if (!FD_COMPETITIONS.includes(m.competition?.code)) return false;
-      const kickoff    = new Date(m.utcDate).getTime();
-      const approxEnd  = kickoff + 115 * 60 * 1000; // kickoff + ~115 min
-      const threeHours = now - 3 * 60 * 60 * 1000;
-      // Must have probably ended by now, and not be older than 3 hours
-      return approxEnd <= now && kickoff >= threeHours;
-    });
+    const results = await Promise.all(
+      dates.map((date) =>
+        afGet("/fixtures", { date, status: FINISHED_STATUSES.join("-") })
+      )
+    );
+
+    return results
+      .flatMap((data) => data?.response ?? [])
+      .filter((m) => AF_LEAGUE_IDS.includes(m.league?.id));
   } catch {
     return [];
   }
@@ -94,62 +120,53 @@ async function getRecentlyFinishedSoccer() {
 async function getTodaySoccerFixtures() {
   try {
     const today = new Date().toISOString().slice(0, 10);
-    const data  = await fdGet("/matches", { dateFrom: today, dateTo: today });
-    return (data.matches ?? []).filter((m) =>
-      FD_COMPETITIONS.includes(m.competition?.code)
-    );
+    const data  = await afGet("/fixtures", { date: today });
+    return (data?.response ?? []).filter((m) => AF_LEAGUE_IDS.includes(m.league?.id));
   } catch {
     return [];
   }
 }
 
-// ── TheSportsDB — Today's fixtures ───────────────────────────────────────────
+// ── Latest goal scorer from a fixture's events array ─────────────────────────
+// The live `/fixtures?live=...` response includes an `events` array per fixture.
+// We take the most recent "Goal" event — this lines up with the scoreline that
+// just triggered the dedup key change in jobs.js.
 
-async function getTodayFixturesByLeague(leagueId) {
-  try {
-    const today = new Date().toISOString().slice(0, 10);
-    const res   = await sportsdb.get("/eventsday.php", {
-      params: { d: today, l: leagueId },
-    });
-    return res.data.events ?? [];
-  } catch (e) {
-    console.error(`❌ getTodayFixturesByLeague (${leagueId}):`, e.message);
-    return [];
-  }
+function extractLatestScorer(fixture) {
+  const events = fixture.events;
+  if (!Array.isArray(events) || events.length === 0) return null;
+
+  const goals = events.filter((e) => e.type === "Goal");
+  if (goals.length === 0) return null;
+
+  const last = goals[goals.length - 1];
+  return last.player?.name ?? null;
 }
 
-// ── Normalise football-data.org match → internal shape ───────────────────────
+// ── Normalise API-Football fixture → internal shape ───────────────────────────
 
-function normaliseFDMatch(m) {
-  const compMap = {
-    PL:  { name: "Premier League",   tag: "#EPL"      },
-    CL:  { name: "Champions League", tag: "#UCL"      },
-    WC:  { name: "World Cup",        tag: "#WorldCup" },
-  };
-  const league = compMap[m.competition?.code] ?? {
-    name: m.competition?.name ?? "",
+function normaliseAFMatch(m) {
+  const league = AF_LEAGUES[m.league?.id] ?? {
+    name: m.league?.name ?? "",
     tag:  "#Football",
   };
 
-  // football-data.org puts current score in fullTime during play,
-  // then keeps it there after FINISHED. halfTime is only reliable at HT.
-  const homeScore = m.score?.fullTime?.home ?? m.score?.halfTime?.home ?? 0;
-  const awayScore = m.score?.fullTime?.away ?? m.score?.halfTime?.away ?? 0;
+  const status = m.fixture?.status?.short;
 
   return {
-    id:          m.id,
-    home_team:   m.homeTeam?.shortName ?? m.homeTeam?.name ?? "",
-    away_team:   m.awayTeam?.shortName ?? m.awayTeam?.name ?? "",
-    home_score:  homeScore,
-    away_score:  awayScore,
-    status:      m.status,
-    // minute field: football-data sends this on live matches
-    minute:      m.minute ?? null,
+    id:          m.fixture?.id,
+    home_team:   m.teams?.home?.name ?? "",
+    away_team:   m.teams?.away?.name ?? "",
+    home_score:  m.goals?.home ?? 0,
+    away_score:  m.goals?.away ?? 0,
+    status,
+    minute:      m.fixture?.status?.elapsed ?? null,
     league_name: league.name,
     league_tag:  league.tag,
-    kickoff_utc: new Date(m.utcDate).getTime(),
-    is_live:     m.status === "IN_PLAY" || m.status === "PAUSED",
-    is_final:    m.status === "FINISHED",
+    kickoff_utc: (m.fixture?.timestamp ?? 0) * 1000,
+    is_live:     LIVE_STATUSES.includes(status),
+    is_final:    FINISHED_STATUSES.includes(status),
+    scorer:      extractLatestScorer(m),
   };
 }
 
@@ -168,8 +185,7 @@ module.exports = {
   getLiveSoccerFixtures,
   getRecentlyFinishedSoccer,
   getTodaySoccerFixtures,
-  normaliseFDMatch,
-  getTodayFixturesByLeague,
+  normaliseAFMatch,
   sleep,
   currentSeason,
 };

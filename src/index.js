@@ -9,7 +9,7 @@ const db     = require("./db");
 
 // ── Validate env vars ─────────────────────────────────────────────────────────
 
-const REQUIRED = ["TELEGRAM_BOT_TOKEN", "TELEGRAM_CHANNEL_ID", "FOOTBALL_DATA_KEY"];
+const REQUIRED = ["TELEGRAM_BOT_TOKEN", "TELEGRAM_CHANNEL_ID", "API_FOOTBALL_KEY"];
 for (const key of REQUIRED) {
   if (!process.env[key]) {
     console.error(`❌ Missing required env var: ${key}`);

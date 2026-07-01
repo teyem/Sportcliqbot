@@ -59,7 +59,7 @@ async function jobLiveSoccer() {
   const liveMatches = await api.getLiveSoccerFixtures();
 
   for (const m of liveMatches) {
-    const f          = api.normaliseFDMatch(m);
+    const f = api.normaliseAFMatch(m); 
     const totalGoals = (f.home_score ?? 0) + (f.away_score ?? 0);
 
     // Skip 0-0 — nothing to report yet
@@ -74,7 +74,7 @@ async function jobLiveSoccer() {
       away:       f.away_team,
       homeScore:  f.home_score,
       awayScore:  f.away_score,
-      scorer:     null, // football-data.org free tier doesn't include scorer
+      scorer:     f.scorer ?? null, // football-data.org free tier doesn't include scorer
       minute:     f.minute ?? "",
       leagueTag:  f.league_tag,
     });
@@ -203,11 +203,11 @@ async function jobFetchDailyFixtures() {
 
   const soccerMatches = await api.getTodaySoccerFixtures();
   for (const m of soccerMatches) {
-    const f = api.normaliseFDMatch(m);
+   const f = api.normaliseAFMatch(m);
     db.upsertFixture({
       fixture_id:  f.id,
       sport:       "soccer",
-      league_id:   m.competition?.code,
+      league_id:   m.league?.id,        // was m.competition?.code
       league_name: f.league_name,
       league_tag:  f.league_tag,
       home_team:   f.home_team,
