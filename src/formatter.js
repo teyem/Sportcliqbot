@@ -93,12 +93,23 @@ function formatTime(utcMs) {
   return new Date(utcMs).toUTCString().replace(" GMT", "");
 }
 
+function soccerMatchStarted({ home, away, leagueTag }) {
+  return (
+    `🟢 *KICK\\-OFF\\!*\n` +
+    `${escMd(home)} 🆚 ${escMd(away)}\n` +
+    `\n${escMd(leagueTag)} \\#Football` +
+    FOOTER
+  );
+}
+
 module.exports = {
   soccerGoal,
   soccerHalfTime,
   soccerFinalResult,
   soccerPreMatch,
+  soccerMatchStarted, // add this
   newsArticle,
   escMd,
   formatTime,
 };
+
