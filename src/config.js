@@ -9,8 +9,8 @@ module.exports = {
   soccer: [
     // API-Football (api-sports.io) league IDs — different scheme to the old
     // football-data.org codes and to the old (unused) TheSportsDB ids.
-    { id: 39, name: "Premier League",   flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", tag: "#EPL"      },
-    { id: 2,  name: "Champions League", flag: "🏆",      tag: "#UCL"      },
+    // { id: 39, name: "Premier League",   flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", tag: "#EPL"      },
+    // { id: 2,  name: "Champions League", flag: "🏆",      tag: "#UCL"      },
     { id: 1,  name: "World Cup",        flag: "🌍",      tag: "#WorldCup" },
   ],
 },
