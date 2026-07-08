@@ -93,22 +93,28 @@ async function jobLiveSoccer() {
   const finished = await api.getRecentlyFinishedSoccer();
 
   for (const m of finished) {
-    const f   = api.normaliseAFMatch(m);
-    const key = `soccer-ft-${f.id}`;
+    const f = api.normaliseAFMatch(m);
+    // Keyed by status too: API-Football briefly reports "FT" at 90' even when a
+    // match is headed to extra time/penalties, then later resolves to AET/PEN.
+    // Without the status in the key, that early FT blocks the real final result.
+    const key = `soccer-ft-${f.id}-${f.status}`;
     if (db.hasPosted(key)) continue;
 
     const msg = fmt.soccerFinalResult({
-      home:       f.home_team,
-      away:       f.away_team,
-      homeScore:  f.home_score,
-      awayScore:  f.away_score,
-      leagueName: f.league_name,
-      leagueTag:  f.league_tag,
+      home:        f.home_team,
+      away:        f.away_team,
+      homeScore:   f.home_score,
+      awayScore:   f.away_score,
+      leagueName:  f.league_name,
+      leagueTag:   f.league_tag,
+      status:      f.status,
+      penaltyHome: f.penalty_home,
+      penaltyAway: f.penalty_away,
     });
 
     await send(msg);
     db.markPosted(key, "soccer-ft");
-    console.log(`🏁 FT: ${f.home_team} ${f.home_score}-${f.away_score} ${f.away_team}`);
+    console.log(`🏁 ${f.status}: ${f.home_team} ${f.home_score}-${f.away_score} ${f.away_team}`);
   }
 }
 

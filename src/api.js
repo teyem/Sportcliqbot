@@ -154,19 +154,21 @@ function normaliseAFMatch(m) {
   const status = m.fixture?.status?.short;
 
   return {
-    id:          m.fixture?.id,
-    home_team:   m.teams?.home?.name ?? "",
-    away_team:   m.teams?.away?.name ?? "",
-    home_score:  m.goals?.home ?? 0,
-    away_score:  m.goals?.away ?? 0,
+    id:            m.fixture?.id,
+    home_team:     m.teams?.home?.name ?? "",
+    away_team:     m.teams?.away?.name ?? "",
+    home_score:    m.goals?.home ?? 0,
+    away_score:    m.goals?.away ?? 0,
+    penalty_home:  m.score?.penalty?.home ?? null,
+    penalty_away:  m.score?.penalty?.away ?? null,
     status,
-    minute:      m.fixture?.status?.elapsed ?? null,
-    league_name: league.name,
-    league_tag:  league.tag,
-    kickoff_utc: (m.fixture?.timestamp ?? 0) * 1000,
-    is_live:     LIVE_STATUSES.includes(status),
-    is_final:    FINISHED_STATUSES.includes(status),
-    scorer:      extractLatestScorer(m),
+    minute:        m.fixture?.status?.elapsed ?? null,
+    league_name:   league.name,
+    league_tag:    league.tag,
+    kickoff_utc:   (m.fixture?.timestamp ?? 0) * 1000,
+    is_live:       LIVE_STATUSES.includes(status),
+    is_final:      FINISHED_STATUSES.includes(status),
+    scorer:        extractLatestScorer(m),
   };
 }
 

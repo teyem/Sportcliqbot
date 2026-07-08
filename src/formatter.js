@@ -31,10 +31,23 @@ function soccerHalfTime({ home, away, homeScore, awayScore, leagueTag }) {
   );
 }
 
-function soccerFinalResult({ home, away, homeScore, awayScore, leagueName, leagueTag }) {
+function soccerFinalResult({ home, away, homeScore, awayScore, leagueName, leagueTag, status, penaltyHome, penaltyAway }) {
+  let label = "FULL TIME";
+  let penaltyLine = "";
+
+  if (status === "AET") {
+    label = "FULL TIME \\(AFTER EXTRA TIME\\)";
+  } else if (status === "PEN") {
+    label = "FULL TIME \\(PENALTIES\\)";
+    if (penaltyHome != null && penaltyAway != null) {
+      penaltyLine = `🎯 Penalties: *${penaltyHome}–${penaltyAway}*\n`;
+    }
+  }
+
   return (
-    `🏁 *FULL TIME*\n` +
+    `🏁 *${label}*\n` +
     `${escMd(home)} *${homeScore}–${awayScore}* ${escMd(away)}\n` +
+    penaltyLine +
     `📋 ${escMd(leagueName)}\n` +
     `\n${escMd(leagueTag)} \\#Football \\#FT` +
     FOOTER
@@ -112,4 +125,3 @@ module.exports = {
   escMd,
   formatTime,
 };
-
