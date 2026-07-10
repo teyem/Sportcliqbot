@@ -81,13 +81,16 @@ async function afGet(path, params, retries = 2) {
 
 async function getLiveSoccerFixtures() {
   try {
-    const data = await afGet("/fixtures", { live: AF_LEAGUE_IDS.join("-") });
-    return data?.response ?? [];
+    // "live" must be "all" or a multi-id hyphenated list ("id-id-id"); a
+    // single league id (e.g. "1") fails API-Football's regex validation.
+    // Safer to always request "all" and filter to our leagues client-side —
+    // same pattern already used in getRecentlyFinishedSoccer / getTodaySoccerFixtures.
+    const data = await afGet("/fixtures", { live: "all" });
+    return (data?.response ?? []).filter((m) => AF_LEAGUE_IDS.includes(m.league?.id));
   } catch {
     return [];
   }
 }
-
 // ── Recently Finished Soccer Matches ─────────────────────────────────────────
 // Status is authoritative now (FT/AET/PEN), so no more approximation — we just
 // pull today's + yesterday's date (covers matches that started before midnight

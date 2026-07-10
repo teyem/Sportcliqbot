@@ -39,6 +39,14 @@
     "soccer-live-537168-1-1": {
       "type": "soccer-live",
       "posted_at": 1778271485752
+    },
+    "soccer-ft-1578539-FT": {
+      "type": "soccer-ft",
+      "posted_at": 1783714172368
+    },
+    "soccer-live-1581821-1-1": {
+      "type": "soccer-live",
+      "posted_at": 1783714487695
     }
   },
   "news": {
@@ -147,6 +155,16 @@
       "away_team": "Universitario",
       "kickoff_utc": 1778198400000,
       "status": "NS",
+      "prematch_sent": 0
+    },
+    "1581821": {
+      "fixture_id": 1581821,
+      "home_team": "Spain",
+      "away_team": "Belgium",
+      "kickoff_utc": 1783710000000,
+      "status": "2H",
+      "league_name": "World Cup",
+      "league_tag": "#WorldCup",
       "prematch_sent": 0
     },
     "401772988": {
